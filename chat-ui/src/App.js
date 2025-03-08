@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Shield, Menu, X
+  Menu, X, Flame
 } from 'lucide-react';
 import './index.css';
 
@@ -40,10 +40,12 @@ const App = () => {
       )}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center">
-          <Shield className="w-8 h-8 text-blue-700 mr-2" />
+          <div className="p-2 bg-blue-100 rounded-full mr-3">
+            <Flame className="w-6 h-6 text-blue-600" />
+          </div>
           <div>
-            <h1 className="text-xl font-bold">SafeWeb3</h1>
-            <p className="text-sm text-gray-600">URL Security Scanner</p>
+            <h1 className="text-xl font-bold">FlareBeacon</h1>
+            <p className="text-sm text-gray-600">Web3 Security Navigator</p>
           </div>
         </div>
       </div>
@@ -137,10 +139,15 @@ const App = () => {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm z-10">
-          <div className="px-4 py-4 sm:px-6 lg:px-8">
+          <div className="px-4 py-4 sm:px-6 lg:px-8 flex items-center">
             <h1 className="text-lg font-semibold text-gray-900">
               {navItems.find(item => item.id === currentView)?.label || 'Dashboard'}
             </h1>
+            <div className="ml-auto">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                Flare Network
+              </span>
+            </div>
           </div>
         </header>
         
