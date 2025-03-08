@@ -288,7 +288,7 @@ class ChatRouter:
         Returns:
             dict[str, str]: Response indicating unsupported operation
         """
-        return {"response": "Sorry I can't do that right now"}
+        return {"response": " I can't do that right now"}
 
     async def handle_attestation(self, _: str) -> dict[str, str]:
         """
