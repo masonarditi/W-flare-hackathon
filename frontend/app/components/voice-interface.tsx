@@ -85,12 +85,7 @@ export default function VoiceInterface() {
       }
 
       const data = await response.json();
-
-      // Check if response contains a transaction preview
-      if (data.response.includes("Transaction Preview:")) {
-        setAwaitingConfirmation(true);
-        setPendingTransaction(text);
-      }
+      console.log("AI Response:", data.response);
 
       return data.response;
     } catch (error) {
@@ -101,10 +96,60 @@ export default function VoiceInterface() {
 
   // Enhanced command processing with multilingual support
   const processVoiceCommand = async (speech: string) => {
-    const lowerSpeech = speech.toLowerCase();
+    const lowerSpeech = speech.toLowerCase().trim();
     const words = lowerSpeech.split(" ");
 
-    // Check for swap commands
+    // Handle confirmation/rejection first
+    if (awaitingConfirmation && pendingTransaction) {
+      // Expanded French confirmation words
+      const confirmWords = ["yes", "oui", "ouais", "ok", "d'accord", "daccord"];
+      const rejectWords = ["no", "non", "pas"];
+
+      if (confirmWords.some((word) => lowerSpeech.includes(word))) {
+        if (pendingTransaction.startsWith("swap:")) {
+          const [_, amount, targetToken] = pendingTransaction.split(":");
+          // Execute swap logic
+          try {
+            const amountOutMin = BigInt(0);
+            const path = [
+              "0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d",
+              targetToken as `0x${string}`,
+            ];
+            const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 20);
+
+            await writeContract({
+              address: "0x..." as `0x${string}`, // Add your FlrUsdtSwap contract address here
+              abi: FlrUsdtSwap.abi,
+              functionName: "swapExactNATForTokens",
+              args: [amountOutMin, path, address, deadline],
+              value: parseEther(amount),
+            });
+          } catch (error) {
+            console.error("Swap failed:", error);
+          }
+        } else if (pendingTransaction.startsWith("send:")) {
+          const [_, amount, recipient] = pendingTransaction.split(":");
+          if (sendTransaction) {
+            sendTransaction({
+              to: recipient as `0x${string}`,
+              value: parseEther(amount),
+            });
+          }
+        }
+        setAwaitingConfirmation(false);
+        setPendingTransaction(null);
+        return;
+      }
+      if (rejectWords.some((word) => lowerSpeech.includes(word))) {
+        setAwaitingConfirmation(false);
+        setPendingTransaction(null);
+        const response = await handleSendMessage("Transaction cancelled");
+        setCurrentSpeech(response);
+        return;
+      }
+    }
+
+    // Handle swap commands
     const isSwapCommand = words.some((word) =>
       ["swap", "exchange", "echange", "échange"].includes(word)
     );
@@ -137,29 +182,14 @@ export default function VoiceInterface() {
       }
 
       if (amount && targetToken && address) {
-        console.log(`Swapping ${amount} FLR for ${targetToken}`);
+        // First send to chatbot to get confirmation message
+        const response = await handleSendMessage(speech);
+        setCurrentSpeech(response);
 
-        try {
-          // Prepare swap parameters
-          const amountOutMin = BigInt(0); // In production, calculate minimum amount
-          const path = [
-            "0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d",
-            targetToken,
-          ] as `0x${string}`[]; // WFLR address
-          const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 20); // 20 minutes from now
-
-          writeContract({
-            abi: FlrUsdtSwap.abi,
-            address: FlrUsdtSwap.address as `0x${string}`,
-            functionName: "swapExactNATForTokens",
-            args: [amountOutMin, path, address, deadline],
-            value: parseEther(amount),
-          });
-
-          console.log("Swap transaction sent successfully");
-        } catch (error) {
-          console.error("Swap failed:", error);
-        }
+        // Always set up the pending transaction for swaps
+        setAwaitingConfirmation(true);
+        setPendingTransaction(`swap:${amount}:${targetToken}`);
+        return;
       }
     } else {
       // Check for English or French send commands
@@ -172,7 +202,6 @@ export default function VoiceInterface() {
         // Find the amount (number before FLR/flr)
         let amount = "";
         for (let i = 0; i < words.length; i++) {
-          // Handle both "1" and "un"/"one" cases
           if (
             words[i].match(/^[0-9.]+$/) ||
             words[i] === "un" ||
@@ -194,16 +223,11 @@ export default function VoiceInterface() {
         }
 
         if (amount && recipient) {
-          console.log(`Sending ${amount} FLR to ${recipient}`);
-          setAmount(amount);
-          setRecipientAddress(recipient);
-
-          if (sendTransaction) {
-            sendTransaction({
-              to: recipient as `0x${string}`,
-              value: parseEther(amount),
-            });
-          }
+          setAwaitingConfirmation(true);
+          setPendingTransaction(`send:${amount}:${recipient}`);
+          const response = await handleSendMessage(speech);
+          setCurrentSpeech(response);
+          return;
         }
       }
     }
