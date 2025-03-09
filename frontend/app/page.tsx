@@ -30,9 +30,6 @@ export default function Home() {
         
         {/* Hero Content */}
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-white">
-          <div className="absolute top-4 right-4 z-20">
-            <ConnectButton />
-          </div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -54,7 +51,7 @@ export default function Home() {
               Flare is a full-stack layer 1 solution designed for
               data intensive use cases.
             </p>
-            <div className="flex justify-center">
+            <div className="flex justify-center gap-4">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -63,6 +60,81 @@ export default function Home() {
               >
                 Try it now
               </motion.button>
+              
+              <ConnectButton.Custom>
+                {({
+                  account,
+                  chain,
+                  openAccountModal,
+                  openChainModal,
+                  openConnectModal,
+                  mounted,
+                }) => {
+                  const ready = mounted;
+                  const connected = ready && account && chain;
+
+                  return (
+                    <div
+                      {...(!ready && {
+                        'aria-hidden': true,
+                        style: {
+                          opacity: 0,
+                          pointerEvents: 'none',
+                          userSelect: 'none',
+                        },
+                      })}
+                    >
+                      {(() => {
+                        if (!connected) {
+                          return (
+                            <motion.button
+                              onClick={openConnectModal}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-8 py-3 rounded-md font-normal"
+                            >
+                              Connect Wallet
+                            </motion.button>
+                          );
+                        }
+
+                        return (
+                          <div className="flex gap-3">
+                            <motion.button
+                              onClick={openChainModal}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-4 py-2 rounded-md font-normal flex items-center gap-2"
+                            >
+                              {chain.hasIcon && (
+                                <div style={{ width: 16, height: 16 }}>
+                                  {chain.iconUrl && (
+                                    <img
+                                      alt={chain.name ?? 'Chain icon'}
+                                      src={chain.iconUrl}
+                                      style={{ width: 16, height: 16 }}
+                                    />
+                                  )}
+                                </div>
+                              )}
+                              {chain.name}
+                            </motion.button>
+
+                            <motion.button
+                              onClick={openAccountModal}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-4 py-2 rounded-md font-normal"
+                            >
+                              {account.displayName}
+                            </motion.button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  );
+                }}
+              </ConnectButton.Custom>
             </div>
           </motion.div>
           
