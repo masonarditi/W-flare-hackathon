@@ -18,6 +18,17 @@ export default function AnyComponent() {
     useLegacyResults: false
   });
 
+  // Add a function to handle toggling the listening state
+  const toggleListening = () => {
+    if (isListening) {
+      stopSpeechToText();
+    } else {
+      // Clear previous results when starting a new session
+      startSpeechToText();
+    }
+    setIsListening(!isListening);
+  };
+
   if (error) return <p>Web Speech API is not available in this browser 🤷‍</p>;
 
   useEffect(() => {
@@ -33,15 +44,12 @@ export default function AnyComponent() {
   }, [isListening]);
 
   return (
-    <div className="relative w-full h-[500px] bg-white rounded-xl overflow-hidden flex items-center justify-center">
+    <div className="relative w-full h-[500px] bg-white rounded-xl overflow-hidden flex flex-col items-center justify-center">
       {/* Clean, minimal container */}
       <div className="relative">
         {/* Animation video button */}
         <div
-          onClick={() => {
-            setIsListening(!isListening);
-            isListening ? stopSpeechToText() : startSpeechToText();
-          }}
+          onClick={toggleListening}
           className="relative cursor-pointer"
         >
           {/* Animation video with direct pulsing effect */}
@@ -75,17 +83,70 @@ export default function AnyComponent() {
         </div>
       </div>
 
-      {/* Voice interface results */}
-      <div className="absolute bottom-0 w-full p-4">
-        <h1>Recording: {isRecording.toString()}</h1>
-        <ul>
-          {results.map((result) => (
-            <li key={typeof result === 'string' ? result : result.timestamp}>
-              {typeof result === 'string' ? result : result.transcript}
-            </li>
-          ))}
-          {interimResult && <li>{interimResult}</li>}
-        </ul>
+      {/* Voice interface results - Repositioned below the video */}
+      <div className="w-full mt-24 px-4">
+        <AnimatePresence mode="wait">
+          {(results.length > 0 || interimResult) && (
+            <motion.div 
+              key={isListening ? 'listening' : 'not-listening'}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="max-w-2xl mx-auto text-center"
+            >
+              {results.length > 0 && results.map((result, index) => (
+                <motion.div 
+                  key={typeof result === 'string' ? `${result}-${index}` : result.timestamp}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-2"
+                >
+                  {(typeof result === 'string' ? result : result.transcript)
+                    .split(' ')
+                    .map((word, wordIndex) => (
+                      <motion.span
+                        key={`${word}-${wordIndex}`}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ 
+                          delay: wordIndex * 0.1,
+                          duration: 0.3,
+                          ease: "easeOut"
+                        }}
+                        className="inline-block mx-1 text-2xl font-bold text-pink-600"
+                      >
+                        {word}
+                      </motion.span>
+                    ))}
+                </motion.div>
+              ))}
+              
+              {interimResult && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mt-2"
+                >
+                  {interimResult.split(' ').map((word, wordIndex) => (
+                    <motion.span
+                      key={`interim-${word}-${wordIndex}`}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ 
+                        delay: wordIndex * 0.1,
+                        duration: 0.3,
+                        ease: "easeOut"
+                      }}
+                      className="inline-block mx-1 text-2xl font-bold text-pink-600/70"
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

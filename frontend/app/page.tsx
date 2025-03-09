@@ -231,15 +231,8 @@ export default function Home() {
               viewport={{ once: true, margin: "-100px" }}
               className="text-center mt-16"
             >
-              <p className="text-gray-600 mb-8">
-                Try speaking commands like "Send 10 tokens to Alice" or "Check my balance"
-              </p>
-              <a 
-                href="#" 
-                className="text-[#9c2e4b] hover:text-[#8a2941] font-medium"
-              >
-                Learn more about voice commands →
-              </a>
+
+
             </motion.div>
           </div>
         </div>
