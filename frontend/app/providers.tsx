@@ -1,29 +1,24 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import '@rainbow-me/rainbowkit/styles.css';
-import {
-  getDefaultConfig,
-  RainbowKitProvider,
-} from '@rainbow-me/rainbowkit';
-import { WagmiProvider } from 'wagmi';
+import { ReactNode } from "react";
+import "@rainbow-me/rainbowkit/styles.css";
+import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { WagmiProvider } from "wagmi";
 import {
   mainnet,
   polygon,
   optimism,
   arbitrum,
   base,
-} from 'wagmi/chains';
-import {
-  QueryClientProvider,
-  QueryClient,
-} from "@tanstack/react-query";
+  flare,
+} from "wagmi/chains";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 // Configure RainbowKit
 const config = getDefaultConfig({
-  appName: 'Flare App',
-  projectId: 'YOUR_PROJECT_ID', // Replace with your WalletConnect project ID
-  chains: [mainnet, polygon, optimism, arbitrum, base],
+  appName: "Flare App",
+  projectId: "YOUR_PROJECT_ID", // Replace with your WalletConnect project ID
+  chains: [mainnet, polygon, optimism, arbitrum, base, flare],
   ssr: true,
 });
 
@@ -34,10 +29,8 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-          {children}
-        </RainbowKitProvider>
+        <RainbowKitProvider>{children}</RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );
-} 
+}
