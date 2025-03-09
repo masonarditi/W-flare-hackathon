@@ -1,13 +1,25 @@
-'use client';
-
-import { motion, AnimatePresence } from 'framer-motion';
+"use client";
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import useSpeechToText from 'react-hook-speech-to-text';
 
-export default function VoiceInterface() {
+export default function AnyComponent() {
   const [isListening, setIsListening] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const {
+    error,
+    interimResult,
+    isRecording,
+    results,
+    startSpeechToText,
+    stopSpeechToText,
+  } = useSpeechToText({
+    continuous: true,
+    useLegacyResults: false
+  });
 
-  // Handle video playback
+  if (error) return <p>Web Speech API is not available in this browser 🤷‍</p>;
+
   useEffect(() => {
     if (videoRef.current) {
       if (isListening) {
@@ -26,7 +38,10 @@ export default function VoiceInterface() {
       <div className="relative">
         {/* Animation video button */}
         <div
-          onClick={() => setIsListening(!isListening)}
+          onClick={() => {
+            setIsListening(!isListening);
+            isListening ? stopSpeechToText() : startSpeechToText();
+          }}
           className="relative cursor-pointer"
         >
           {/* Animation video with direct pulsing effect */}
@@ -50,8 +65,6 @@ export default function VoiceInterface() {
               whileTap={{ scale: 0.95 }}
             />
           </div>
-          
-
         </div>
         
         {/* Simple status text */}
@@ -60,6 +73,19 @@ export default function VoiceInterface() {
             {isListening ? 'Listening...' : 'Tap to speak'}
           </span>
         </div>
+      </div>
+
+      {/* Voice interface results */}
+      <div className="absolute bottom-0 w-full p-4">
+        <h1>Recording: {isRecording.toString()}</h1>
+        <ul>
+          {results.map((result) => (
+            <li key={typeof result === 'string' ? result : result.timestamp}>
+              {typeof result === 'string' ? result : result.transcript}
+            </li>
+          ))}
+          {interimResult && <li>{interimResult}</li>}
+        </ul>
       </div>
     </div>
   );
