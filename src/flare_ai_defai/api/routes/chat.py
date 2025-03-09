@@ -175,17 +175,7 @@ class ChatRouter:
         Returns:
             SemanticRouterResponse: Determined route for the message
         """
-        try:
-            prompt, mime_type, schema = self.prompts.get_formatted_prompt(
-                "semantic_router", user_input=message
-            )
-            route_response = self.ai.generate(
-                prompt=prompt, response_mime_type=mime_type, response_schema=schema
-            )
-            return SemanticRouterResponse(route_response.text)
-        except Exception as e:
-            self.logger.exception("routing_failed", error=str(e))
-            return SemanticRouterResponse.CONVERSATIONAL
+        return SemanticRouterResponse.CONVERSATIONAL
 
     async def route_message(
         self, route: SemanticRouterResponse, message: str
@@ -201,10 +191,6 @@ class ChatRouter:
             dict[str, str]: Response from the appropriate handler
         """
         handlers = {
-            SemanticRouterResponse.GENERATE_ACCOUNT: self.handle_generate_account,
-            SemanticRouterResponse.SEND_TOKEN: self.handle_send_token,
-            SemanticRouterResponse.SWAP_TOKEN: self.handle_swap_token,
-            SemanticRouterResponse.REQUEST_ATTESTATION: self.handle_attestation,
             SemanticRouterResponse.CONVERSATIONAL: self.handle_conversation,
         }
 
@@ -213,97 +199,6 @@ class ChatRouter:
             return {"response": "Unsupported route"}
 
         return await handler(message)
-
-    async def handle_generate_account(self, _: str) -> dict[str, str]:
-        """
-        Handle account generation requests.
-
-        Args:
-            _: Unused message parameter
-
-        Returns:
-            dict[str, str]: Response containing new account information
-                or existing account
-        """
-        if self.blockchain.address:
-            return {"response": f"Account exists - {self.blockchain.address}"}
-        address = self.blockchain.generate_account()
-        prompt, mime_type, schema = self.prompts.get_formatted_prompt(
-            "generate_account", address=address
-        )
-        gen_address_response = self.ai.generate(
-            prompt=prompt, response_mime_type=mime_type, response_schema=schema
-        )
-        return {"response": gen_address_response.text}
-
-    async def handle_send_token(self, message: str) -> dict[str, str]:
-        """
-        Handle token sending requests.
-
-        Args:
-            message: Message containing token sending details
-
-        Returns:
-            dict[str, str]: Response containing transaction preview or follow-up prompt
-        """
-        if not self.blockchain.address:
-            await self.handle_generate_account(message)
-
-        prompt, mime_type, schema = self.prompts.get_formatted_prompt(
-            "token_send", user_input=message
-        )
-        send_token_response = self.ai.generate(
-            prompt=prompt, response_mime_type=mime_type, response_schema=schema
-        )
-        send_token_json = json.loads(send_token_response.text)
-        expected_json_len = 2
-        if (
-            len(send_token_json) != expected_json_len
-            or send_token_json.get("amount") == 0.0
-        ):
-            prompt, _, _ = self.prompts.get_formatted_prompt("follow_up_token_send")
-            follow_up_response = self.ai.generate(prompt)
-            return {"response": follow_up_response.text}
-
-        tx = self.blockchain.create_send_flr_tx(
-            to_address=send_token_json.get("to_address"),
-            amount=send_token_json.get("amount"),
-        )
-        self.logger.debug("send_token_tx", tx=tx)
-        self.blockchain.add_tx_to_queue(msg=message, tx=tx)
-        formatted_preview = (
-            "Transaction Preview: "
-            + f"Sending {Web3.from_wei(tx.get('value', 0), 'ether')} "
-            + f"FLR to {tx.get('to')}\nType CONFIRM to proceed."
-        )
-        return {"response": formatted_preview}
-
-    async def handle_swap_token(self, _: str) -> dict[str, str]:
-        """
-        Handle token swap requests (currently unsupported).
-
-        Args:
-            _: Unused message parameter
-
-        Returns:
-            dict[str, str]: Response indicating unsupported operation
-        """
-        return {"response": "Sorry I can't do that right now"}
-
-    async def handle_attestation(self, _: str) -> dict[str, str]:
-        """
-        Handle attestation requests.
-
-        Args:
-            _: Unused message parameter
-
-        Returns:
-            dict[str, str]: Response containing attestation request
-        """
-        prompt = self.prompts.get_formatted_prompt("request_attestation")[0]
-        request_attestation_response = self.ai.generate(prompt=prompt)
-        self.attestation.attestation_requested = True
-        return {"response": request_attestation_response.text}
 
     async def handle_conversation(self, message: str) -> dict[str, str]:
         """

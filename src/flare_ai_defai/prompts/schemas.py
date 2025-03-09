@@ -33,10 +33,6 @@ class SemanticRouterResponse(str, Enum):
         CONVERSATIONAL: Route to general conversational response
     """
 
-    GENERATE_ACCOUNT = "GenerateAccount"
-    SEND_TOKEN = "SendToken"
-    SWAP_TOKEN = "SwapToken"
-    REQUEST_ATTESTATION = "RequestAttestation"
     CONVERSATIONAL = "Conversational"
 
 
