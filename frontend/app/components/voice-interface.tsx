@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import useSpeechToText from 'react-hook-speech-to-text';
 
 export default function AnyComponent() {
@@ -31,6 +31,15 @@ export default function AnyComponent() {
       }
     }
   }, [isListening]);
+
+  useEffect(() => {
+    if (results.length > 0) {
+      console.log('Results:', results);
+    }
+    if (interimResult) {
+      console.log('Interim Result:', interimResult);
+    }
+  }, [results, interimResult]);
 
   return (
     <div className="relative w-full h-[500px] bg-white rounded-xl overflow-hidden flex items-center justify-center">
@@ -76,17 +85,6 @@ export default function AnyComponent() {
       </div>
 
       {/* Voice interface results */}
-      <div className="absolute bottom-0 w-full p-4">
-        <h1>Recording: {isRecording.toString()}</h1>
-        <ul>
-          {results.map((result) => (
-            <li key={typeof result === 'string' ? result : result.timestamp}>
-              {typeof result === 'string' ? result : result.transcript}
-            </li>
-          ))}
-          {interimResult && <li>{interimResult}</li>}
-        </ul>
-      </div>
     </div>
   );
 }
