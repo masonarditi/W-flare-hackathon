@@ -39,7 +39,7 @@ export default function Home() {
               priority
             />
             <h1 className="text-4xl font-normal text-black mb-6 tracking-tight">
-              The blockchain for data
+              Engage with Flare's ecosystem in any language
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 font-light tracking-wide">
               Flare is a full-stack layer 1 solution designed for
