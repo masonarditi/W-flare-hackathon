@@ -21,12 +21,18 @@ const TOKENS = {
   usdt: "0x0B38e83B86d491735fEaa0a791F65c2B99535396",
 } as const;
 
+const BACKEND_ROUTE = "http://localhost:8080/api/routes/chat/";
+
 export default function VoiceInterface() {
   const { address } = useAccount();
   const [recipientAddress, setRecipientAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [currentSpeech, setCurrentSpeech] = useState("");
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+  const [pendingTransaction, setPendingTransaction] = useState<string | null>(
+    null
+  );
   const videoRef = useRef<HTMLVideoElement>(null);
   const speechTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const { writeContract } = useWriteContract();
@@ -63,6 +69,35 @@ export default function VoiceInterface() {
       }
     }
   }, [isListening]);
+
+  const handleSendMessage = async (text: string) => {
+    try {
+      const response = await fetch(BACKEND_ROUTE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: text }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+
+      // Check if response contains a transaction preview
+      if (data.response.includes("Transaction Preview:")) {
+        setAwaitingConfirmation(true);
+        setPendingTransaction(text);
+      }
+
+      return data.response;
+    } catch (error) {
+      console.error("Error:", error);
+      return "Sorry, there was an error processing your request. Please try again.";
+    }
+  };
 
   // Enhanced command processing with multilingual support
   const processVoiceCommand = async (speech: string) => {

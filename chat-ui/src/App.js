@@ -1,25 +1,25 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Send } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import './index.css';
+import React, { useState, useRef, useEffect } from "react";
+import { Send } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import "./index.css";
 
-const BACKEND_ROUTE = 'api/routes/chat/'
+const BACKEND_ROUTE = "http://localhost:8080/api/routes/chat/";
 
 const ChatInterface = () => {
   const [messages, setMessages] = useState([
-    { 
+    {
       text: "Hi, I'm Artemis! 👋 I'm your Copilot for Flare, ready to help you with operations like generating wallets, sending tokens, and executing token swaps. \n\n⚠️ While I aim to be accurate, never risk funds you can't afford to lose.",
-      type: 'bot' 
-    }
+      type: "bot",
+    },
   ]);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [pendingTransaction, setPendingTransaction] = useState(null);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -29,29 +29,29 @@ const ChatInterface = () => {
   const handleSendMessage = async (text) => {
     try {
       const response = await fetch(BACKEND_ROUTE, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ message: text }),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
 
       const data = await response.json();
-      
+
       // Check if response contains a transaction preview
-      if (data.response.includes('Transaction Preview:')) {
+      if (data.response.includes("Transaction Preview:")) {
         setAwaitingConfirmation(true);
         setPendingTransaction(text);
       }
-      
+
       return data.response;
     } catch (error) {
-      console.error('Error:', error);
-      return 'Sorry, there was an error processing your request. Please try again.';
+      console.error("Error:", error);
+      return "Sorry, there was an error processing your request. Please try again.";
     }
   };
 
@@ -60,27 +60,30 @@ const ChatInterface = () => {
     if (!inputText.trim() || isLoading) return;
 
     const messageText = inputText.trim();
-    setInputText('');
+    setInputText("");
     setIsLoading(true);
-    setMessages(prev => [...prev, { text: messageText, type: 'user' }]);
+    setMessages((prev) => [...prev, { text: messageText, type: "user" }]);
 
     // Handle transaction confirmation
     if (awaitingConfirmation) {
-      if (messageText.toUpperCase() === 'CONFIRM') {
+      if (messageText.toUpperCase() === "CONFIRM") {
         setAwaitingConfirmation(false);
         const response = await handleSendMessage(pendingTransaction);
-        setMessages(prev => [...prev, { text: response, type: 'bot' }]);
+        setMessages((prev) => [...prev, { text: response, type: "bot" }]);
       } else {
         setAwaitingConfirmation(false);
         setPendingTransaction(null);
-        setMessages(prev => [...prev, { 
-          text: 'Transaction cancelled. How else can I help you?', 
-          type: 'bot' 
-        }]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            text: "Transaction cancelled. How else can I help you?",
+            type: "bot",
+          },
+        ]);
       }
     } else {
       const response = await handleSendMessage(messageText);
-      setMessages(prev => [...prev, { text: response, type: 'bot' }]);
+      setMessages((prev) => [...prev, { text: response, type: "bot" }]);
     }
 
     setIsLoading(false);
@@ -91,17 +94,24 @@ const ChatInterface = () => {
     // Override paragraph to remove default margins
     p: ({ children }) => <span className="inline">{children}</span>,
     // Style code blocks
-    code: ({ node, inline, className, children, ...props }) => (
-      inline ? 
-        <code className="bg-gray-200 rounded px-1 py-0.5 text-sm">{children}</code> :
+    code: ({ node, inline, className, children, ...props }) =>
+      inline ? (
+        <code className="bg-gray-200 rounded px-1 py-0.5 text-sm">
+          {children}
+        </code>
+      ) : (
         <pre className="bg-gray-200 rounded p-2 my-2 overflow-x-auto">
-          <code {...props} className="text-sm">{children}</code>
+          <code {...props} className="text-sm">
+            {children}
+          </code>
         </pre>
-    ),
+      ),
     // Style links
     a: ({ node, children, ...props }) => (
-      <a {...props} className="text-pink-600 hover:underline">{children}</a>
-    )
+      <a {...props} className="text-pink-600 hover:underline">
+        {children}
+      </a>
+    ),
   };
 
   return (
@@ -110,7 +120,9 @@ const ChatInterface = () => {
         {/* Header */}
         <div className="bg-pink-600 text-white p-4">
           <h1 className="text-xl font-bold">Artemis</h1>
-          <p className="text-sm opacity-80">DeFAI Copilot for Flare (gemini-2.0-flash)</p>
+          <p className="text-sm opacity-80">
+            DeFAI Copilot for Flare (gemini-2.0-flash)
+          </p>
         </div>
 
         {/* Messages container */}
@@ -118,28 +130,30 @@ const ChatInterface = () => {
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${
+                message.type === "user" ? "justify-end" : "justify-start"
+              }`}
             >
-              {message.type === 'bot' && (
+              {message.type === "bot" && (
                 <div className="w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center text-white font-bold mr-2">
                   A
                 </div>
               )}
               <div
                 className={`max-w-xs px-4 py-2 rounded-xl ${
-                  message.type === 'user'
-                    ? 'bg-pink-600 text-white rounded-br-none'
-                    : 'bg-gray-100 text-gray-800 rounded-bl-none'
+                  message.type === "user"
+                    ? "bg-pink-600 text-white rounded-br-none"
+                    : "bg-gray-100 text-gray-800 rounded-bl-none"
                 }`}
               >
-                <ReactMarkdown 
+                <ReactMarkdown
                   components={MarkdownComponents}
                   className="text-sm break-words whitespace-pre-wrap"
                 >
                   {message.text}
                 </ReactMarkdown>
               </div>
-              {message.type === 'user' && (
+              {message.type === "user" && (
                 <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold ml-2">
                   U
                 </div>
@@ -170,7 +184,11 @@ const ChatInterface = () => {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={awaitingConfirmation ? "Type CONFIRM to proceed or anything else to cancel" : "Type your message... (Markdown supported)"}
+              placeholder={
+                awaitingConfirmation
+                  ? "Type CONFIRM to proceed or anything else to cancel"
+                  : "Type your message... (Markdown supported)"
+              }
               className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               disabled={isLoading}
             />
