@@ -366,7 +366,7 @@ export default function VoiceInterface() {
                         duration: 0.3,
                         ease: "easeOut",
                       }}
-                      className="inline-block mx-1 text-2xl font-bold text-blue-600"
+                      className="inline-block mx-1 text-2xl font-bold text-pink-600"
                     >
                       {word}
                     </motion.span>
