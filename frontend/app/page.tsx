@@ -1,12 +1,18 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import Image from 'next/image';
 import VoiceInterface from './components/voice-interface';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 export default function Home() {
-  const [showVoiceInterface, setShowVoiceInterface] = useState(false);
+  const scrollToVoiceInterface = () => {
+    // Smooth scroll to the voice interface section
+    document.getElementById('voice-interface-section')?.scrollIntoView({ 
+      behavior: 'smooth' 
+    });
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen" style={{ backgroundColor: '#f2f2f2' }}>
@@ -23,7 +29,10 @@ export default function Home() {
         </div>
         
         {/* Hero Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center">
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-white">
+          <div className="absolute top-4 right-4 z-20">
+            <ConnectButton />
+          </div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -38,67 +47,103 @@ export default function Home() {
               className="mx-auto mb-6"
               priority
             />
-            <h1 className="text-4xl font-normal text-black mb-6 tracking-tight">
-              Engage with Flare's ecosystem in any language
+            <h1 className="text-4xl font-normal text-center text-black mb-6 tracking-tight">
+              The blockchain for data
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 font-light tracking-wide">
+            <p className="text-xl md:text-2xl text-center text-gray-600 mb-8 font-light tracking-wide">
               Flare is a full-stack layer 1 solution designed for
               data intensive use cases.
             </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-8 py-3 rounded-md font-normal"
-              onClick={() => setShowVoiceInterface(true)}
-            >
-              Try it now
-            </motion.button>
+            <div className="flex justify-center">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-8 py-3 rounded-md font-normal"
+                onClick={scrollToVoiceInterface}
+              >
+                Try it now
+              </motion.button>
+            </div>
+          </motion.div>
+          
+          {/* Scroll indicator */}
+          <motion.div 
+            className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <div className="flex flex-col items-center">
+              <p className="text-sm text-gray-600 mb-2">Scroll down to try</p>
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="text-gray-600"
+              >
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+              </svg>
+            </div>
           </motion.div>
         </div>
       </div>
 
-      {/* Voice Interface Modal */}
-      <AnimatePresence>
-        {showVoiceInterface && (
-          <motion.div 
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={(e) => {
-              // Close when clicking outside the interface
-              if (e.target === e.currentTarget) {
-                setShowVoiceInterface(false);
-              }
-            }}
-          >
-            <motion.div 
-              className="bg-white rounded-xl p-8 max-w-4xl w-full shadow-2xl"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", damping: 25 }}
+      {/* Voice Interface Section - Seamless scroll design */}
+      <div 
+        id="voice-interface-section" 
+        className="w-full min-h-screen bg-gradient-to-b from-[#f2f2f2] to-white py-20"
+      >
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true, margin: "-100px" }}
+              className="text-center mb-16"
             >
-              <div className="flex flex-col items-center">
-                <h2 className="text-2xl font-normal text-gray-800 mb-6 tracking-tight">
-                  Voice Interface
-                </h2>
-                
-                <VoiceInterface />
-                
-                <motion.button 
-                  onClick={() => setShowVoiceInterface(false)}
-                  className="mt-6 px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Close
-                </motion.button>
-              </div>
+              <h2 className="text-3xl font-normal text-gray-800 mb-6 tracking-tight">
+                Voice Interface
+              </h2>
+              <p className="text-xl text-gray-600 font-light">
+                Speak naturally to execute transactions and interact with smart contracts
+              </p>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true, margin: "-100px" }}
+            >
+              <VoiceInterface />
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true, margin: "-100px" }}
+              className="text-center mt-16"
+            >
+              <p className="text-gray-600 mb-8">
+                Try speaking commands like "Send 10 tokens to Alice" or "Check my balance"
+              </p>
+              <a 
+                href="#" 
+                className="text-[#9c2e4b] hover:text-[#8a2941] font-medium"
+              >
+                Learn more about voice commands →
+              </a>
+            </motion.div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
