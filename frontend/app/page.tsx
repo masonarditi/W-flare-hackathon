@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import Image from 'next/image';
 import VoiceInterface from './components/voice-interface';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 export default function Home() {
   const scrollToVoiceInterface = () => {
@@ -28,7 +29,10 @@ export default function Home() {
         </div>
         
         {/* Hero Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center">
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-white">
+          <div className="absolute top-4 right-4 z-20">
+            <ConnectButton />
+          </div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -43,21 +47,23 @@ export default function Home() {
               className="mx-auto mb-6"
               priority
             />
-            <h1 className="text-4xl font-normal text-black mb-6 tracking-tight">
+            <h1 className="text-4xl font-normal text-center text-black mb-6 tracking-tight">
               The blockchain for data
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 font-light tracking-wide">
+            <p className="text-xl md:text-2xl text-center text-gray-600 mb-8 font-light tracking-wide">
               Flare is a full-stack layer 1 solution designed for
               data intensive use cases.
             </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-8 py-3 rounded-md font-normal"
-              onClick={scrollToVoiceInterface}
-            >
-              Try it now
-            </motion.button>
+            <div className="flex justify-center">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-8 py-3 rounded-md font-normal"
+                onClick={scrollToVoiceInterface}
+              >
+                Try it now
+              </motion.button>
+            </div>
           </motion.div>
           
           {/* Scroll indicator */}
