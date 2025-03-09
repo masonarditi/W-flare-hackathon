@@ -12,7 +12,7 @@ type AddressBookType = {
 };
 
 const ADDRESS_BOOK: AddressBookType = {
-  romain: "0x8fBa7D8342CB0C804c369727F71699C1afaC55d3",
+  romain: "0x98cC8F6627688A48D2A4cc17Cd79741cC67c9DdA",
   // Add more mappings as needed
 };
 
