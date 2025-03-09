@@ -11,12 +11,10 @@ The module provides a ChatRouter class that integrates various services:
 - Prompt management through PromptService
 """
 
-import json
 
 import structlog
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from web3 import Web3
 from web3.exceptions import Web3RPCError
 
 from flare_ai_defai.ai import GeminiProvider

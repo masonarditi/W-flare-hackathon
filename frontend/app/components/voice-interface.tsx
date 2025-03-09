@@ -118,14 +118,16 @@ export default function VoiceInterface() {
             const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 20);
 
             await writeContract({
-              address: "0x..." as `0x${string}`, // Add your FlrUsdtSwap contract address here
+              address: FlrUsdtSwap.address as `0x${string}`, // Use the address from the imported ABI
               abi: FlrUsdtSwap.abi,
               functionName: "swapExactNATForTokens",
               args: [amountOutMin, path, address, deadline],
               value: parseEther(amount),
             });
+            setCurrentSpeech("Swap transaction sent!");
           } catch (error) {
             console.error("Swap failed:", error);
+            setCurrentSpeech("Swap failed: " + error);
           }
         } else if (pendingTransaction.startsWith("send:")) {
           const [_, amount, recipient] = pendingTransaction.split(":");
@@ -151,13 +153,20 @@ export default function VoiceInterface() {
 
     // Handle swap commands
     const isSwapCommand = words.some((word) =>
-      ["swap", "exchange", "echange", "échange"].includes(word)
+      [
+        "swap",
+        "exchange",
+        "echange",
+        "échange",
+        "échanger",
+        "swapper",
+      ].includes(word)
     );
     const isForCommand = words.some((word) =>
-      ["for", "to", "contre", "en"].includes(word)
+      ["for", "to", "contre", "en", "vers"].includes(word)
     );
 
-    if (isSwapCommand && isForCommand) {
+    if (isSwapCommand) {
       // Find amount
       let amount = "";
       for (let i = 0; i < words.length; i++) {
@@ -182,13 +191,10 @@ export default function VoiceInterface() {
       }
 
       if (amount && targetToken && address) {
-        // First send to chatbot to get confirmation message
-        const response = await handleSendMessage(speech);
-        setCurrentSpeech(response);
-
-        // Always set up the pending transaction for swaps
         setAwaitingConfirmation(true);
         setPendingTransaction(`swap:${amount}:${targetToken}`);
+        const response = await handleSendMessage(speech);
+        setCurrentSpeech(response);
         return;
       }
     } else {
@@ -251,7 +257,7 @@ export default function VoiceInterface() {
 
       if (amount && token) {
         if (amount === "un" || amount === "one") amount = "1";
-        return `Swapping ${amount} FLR for ${token.toUpperCase()}`;
+        return `swap ${amount} FLR for ${token.toUpperCase()}`;
       }
     }
     return speech;
