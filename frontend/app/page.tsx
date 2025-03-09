@@ -5,10 +5,14 @@ import { useState } from 'react';
 import Image from 'next/image';
 import VoiceInterface from './components/voice-interface';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
 
 export default function Home() {
+  const { isConnected } = useAccount();
+  
   const scrollToVoiceInterface = () => {
-    // Smooth scroll to the voice interface section
+    if (!isConnected) return;
+    
     document.getElementById('voice-interface-section')?.scrollIntoView({ 
       behavior: 'smooth' 
     });
@@ -51,16 +55,40 @@ export default function Home() {
               Flare is a full-stack layer 1 solution designed for
               data intensive use cases.
             </p>
+            
+            {/* Buttons side by side */}
             <div className="flex justify-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-8 py-3 rounded-md font-normal"
-                onClick={scrollToVoiceInterface}
-              >
-                Try it now
-              </motion.button>
+              {/* Try it now button with wallet connection check */}
+              <ConnectButton.Custom>
+                {({
+                  account,
+                  chain,
+                  openConnectModal,
+                  mounted,
+                }) => {
+                  const ready = mounted;
+                  const connected = ready && account && chain;
+
+                  return (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-8 py-3 rounded-md font-normal h-[50px]"
+                      onClick={() => {
+                        if (!connected) {
+                          openConnectModal();
+                        } else {
+                          scrollToVoiceInterface();
+                        }
+                      }}
+                    >
+                      Try it now
+                    </motion.button>
+                  );
+                }}
+              </ConnectButton.Custom>
               
+              {/* Connect Wallet button */}
               <ConnectButton.Custom>
                 {({
                   account,
@@ -91,7 +119,7 @@ export default function Home() {
                               onClick={openConnectModal}
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
-                              className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-8 py-3 rounded-md font-normal"
+                              className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-8 py-3 rounded-md font-normal h-[50px]"
                             >
                               Connect Wallet
                             </motion.button>
@@ -104,15 +132,15 @@ export default function Home() {
                               onClick={openChainModal}
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
-                              className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-4 py-2 rounded-md font-normal flex items-center gap-2"
+                              className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-4 py-3 rounded-md font-normal flex items-center gap-2 h-[50px]"
                             >
                               {chain.hasIcon && (
-                                <div style={{ width: 16, height: 16 }}>
+                                <div style={{ width: 20, height: 20 }}>
                                   {chain.iconUrl && (
                                     <img
                                       alt={chain.name ?? 'Chain icon'}
                                       src={chain.iconUrl}
-                                      style={{ width: 16, height: 16 }}
+                                      style={{ width: 20, height: 20 }}
                                     />
                                   )}
                                 </div>
@@ -124,7 +152,7 @@ export default function Home() {
                               onClick={openAccountModal}
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
-                              className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-4 py-2 rounded-md font-normal"
+                              className="bg-[#9c2e4b] hover:bg-[#8a2941] text-white px-4 py-3 rounded-md font-normal h-[50px] flex items-center"
                             >
                               {account.displayName}
                             </motion.button>
